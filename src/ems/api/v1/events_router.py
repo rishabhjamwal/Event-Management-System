@@ -85,7 +85,7 @@ def read_event(
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     if event.owner_id != current_user.id:
-        from ems.services import permission as permission_service
+        from ems.services import permission_service
         permission = permission_service.get_permission(db, str(event_id), str(current_user.id))
         if not permission or not permission.can_view:
             raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -106,7 +106,7 @@ def update_event(
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     if event.owner_id != current_user.id:
-        from ems.services import permission as permission_service
+        from ems.services import permission_service
         permission = permission_service.get_permission(db, str(event_id), str(current_user.id))
         if not permission or not permission.can_edit:
             raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -150,7 +150,7 @@ def delete_event(
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     if event.owner_id != current_user.id:
-        from ems.services import permission as permission_service
+        from ems.services import permission_service
         permission = permission_service.get_permission(db, str(event_id), str(current_user.id))
         if not permission or not permission.can_delete:
             raise HTTPException(status_code=403, detail="Not enough permissions")

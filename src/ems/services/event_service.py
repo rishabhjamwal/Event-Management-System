@@ -48,7 +48,7 @@ def create(db: Session, *, obj_in: EventCreate, owner_id: str) -> Event:
     db.commit()
     db.refresh(db_obj)
     # Create initial version and changelog
-    from ems.services import version as version_service
+    from ems.services import version_service
     version = version_service.create_version(db, db_obj, owner_id, "Initial version")
     version_service.create_changelog(
         db, 
@@ -63,7 +63,7 @@ def create(db: Session, *, obj_in: EventCreate, owner_id: str) -> Event:
 
 def update(db: Session, *, db_obj: Event, obj_in: EventUpdate) -> Event:
     # Store the original data for diff
-    from ems.services import version as version_service
+    from ems.services import version_service
     latest_version = version_service.get_latest_version(db, str(db_obj.id))
     old_data = latest_version.data if latest_version else None
 
@@ -217,7 +217,7 @@ def check_user_access(db: Session, event_id: str, user_id: str, permission_type:
         return True
     
     # Check specific permission for non-owners
-    from ems.services import permission as permission_service
+    from ems.services import permission_service
     return permission_service.check_permission(db, event_id, user_id, permission_type)
     
     # Exclude the current event if updating

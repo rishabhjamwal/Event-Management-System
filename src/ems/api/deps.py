@@ -12,7 +12,7 @@ from ems.core.security import is_token_blacklisted
 from ems.db.session import SessionLocal
 from ems.models.user_model import User
 from ems.schemas.token_schema import TokenPayload
-from ems.services import user_service as user_service
+from ems.services import user_service
 from ems.models.event_model import Event  
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -80,7 +80,7 @@ def get_current_user(
             )
         
         # Get the event
-        from ems.services import event as event_service
+        from ems.services import event_service
         event = event_service.get_by_id(db, event_id)
         if event is None:
             raise HTTPException(
@@ -93,7 +93,7 @@ def get_current_user(
             return event  # Owner has all permissions
         
         # Check if user has the required permission
-        from ems.services import permission as permission_service
+        from ems.services import permission_service
         permission = permission_service.get_permission(db, str(event_id), str(current_user.id))
         if permission is None:
             raise HTTPException(

@@ -2,7 +2,6 @@
 venv/
 env/
 ENV/
-.env
 
 # Python cache files
 __pycache__/
@@ -22,15 +21,14 @@ build/
 logs/
 
 # Local development settings
-.env
-.env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
 # IDE specific files
 .idea/
-.vscode/
 *.swp
 *.swo
 .DS_Store
+config.bat
+node_modules

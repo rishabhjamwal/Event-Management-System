@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from app.api.v1 import auth, events, permissions
+from app.api.v1 import auth, events, permissions, versions
 from app.core.config import settings
 from app.db.session import engine
 from app.db.base import Base 
@@ -33,6 +33,11 @@ app.include_router(
     permissions.router, 
     prefix=f"{settings.API_V1_STR}/events", 
     tags=["permissions"]
+)
+app.include_router(
+    versions.router, 
+    prefix=f"{settings.API_V1_STR}/events", 
+    tags=["versions"]
 )
 @app.get("/")
 def read_root():

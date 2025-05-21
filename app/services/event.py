@@ -47,9 +47,27 @@ def create(db: Session, *, obj_in: EventCreate, owner_id: str) -> Event:
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
+    # Create initial version and changelog
+    from app.services import version as version_service
+    version = version_service.create_version(db, db_obj, owner_id, "Initial version")
+    version_service.create_changelog(
+        db, 
+        str(db_obj.id), 
+        owner_id, 
+        'create', 
+        None, 
+        version.version_number, 
+        None
+    )
     return db_obj
 
 def update(db: Session, *, db_obj: Event, obj_in: EventUpdate) -> Event:
+    # Store the original data for diff
+    from app.services import version as version_service
+    latest_version = version_service.get_latest_version(db, str(db_obj.id))
+    old_data = latest_version.data if latest_version else None
+
+    # Event Update
     update_data = obj_in.model_dump(exclude_unset=True)
     
     # Increment version on update
@@ -61,6 +79,42 @@ def update(db: Session, *, db_obj: Event, obj_in: EventUpdate) -> Event:
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
+    
+    new_version = version_service.create_version(
+        db, 
+        db_obj, 
+        db_obj.owner_id, 
+        "Update event"
+    )
+    
+    # Generate diff and create changelog
+    if old_data:
+        # Create event data for diff
+        event_data = {
+            "id": str(db_obj.id),
+            "title": db_obj.title,
+            "description": db_obj.description,
+            "start_time": db_obj.start_time.isoformat() if db_obj.start_time else None,
+            "end_time": db_obj.end_time.isoformat() if db_obj.end_time else None,
+            "location": db_obj.location,
+            "is_recurring": db_obj.is_recurring,
+            "recurrence_pattern": db_obj.recurrence_pattern,
+            "owner_id": str(db_obj.owner_id),
+            "created_at": db_obj.created_at.isoformat() if db_obj.created_at else None,
+            "updated_at": db_obj.updated_at.isoformat() if db_obj.updated_at else None,
+            "current_version": db_obj.current_version
+        }
+        
+        changes = version_service.generate_diff(old_data, event_data)
+        version_service.create_changelog(
+            db,
+            str(db_obj.id),
+            str(db_obj.owner_id),
+            'update',
+            latest_version.version_number,
+            new_version.version_number,
+            changes
+        )
     return db_obj
 
 def delete(db: Session, *, db_obj: Event) -> None:

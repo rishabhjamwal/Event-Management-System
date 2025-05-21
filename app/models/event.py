@@ -27,3 +27,5 @@ class Event(Base):
     # Relationships
     owner = relationship("User", back_populates="events")
     permissions = relationship("EventPermission", back_populates="event", cascade="all, delete-orphan")
+    versions = relationship("EventVersion", back_populates="event", cascade="all, delete-orphan")
+    changelogs = relationship("EventChangelog", back_populates="event", cascade="all, delete-orphan")

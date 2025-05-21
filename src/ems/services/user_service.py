@@ -31,7 +31,7 @@ def create(db: Session, *, obj_in: UserCreate) -> User:
     return db_obj
 
 def update(db: Session, *, db_obj: User, obj_in: UserUpdate) -> User:
-    update_data = obj_in.dict(exclude_unset=True)
+    update_data = obj_in.model_dump(exclude_unset=True)
     
     if update_data.get("password"):
         hashed_password = get_password_hash(update_data["password"])
@@ -55,7 +55,7 @@ def authenticate(db: Session, *, username_or_email: str, password: str) -> Optio
     return user
 
 def update_last_login(db: Session, *, user: User) -> User:
-    user.last_login = datetime.utcnow()
+    user.last_login = datetime.now(datetime.timezone.utc)
     db.add(user)
     db.commit()
     db.refresh(user)

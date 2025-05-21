@@ -8,32 +8,16 @@ from ems.dependencies import deps
 from ems.models.user_model import User
 from ems.schemas.permission_schema import Permission, PermissionCreate, PermissionUpdate, ShareEventRequest
 from ems.services import  event_service, permission_service, user_service
+from ems.utils.helper import permission_to_dict
+from ems.db import session
+
 
 router = APIRouter()
-
-# app/api/v1/permissions.py
-# Add this helper function at the top of the file
-
-def permission_to_dict(permission, username=None):
-    """Convert an EventPermission object to a dictionary with string UUIDs"""
-    return {
-        "id": str(permission.id),
-        "event_id": str(permission.event_id),
-        "user_id": str(permission.user_id),
-        "granted_by_id": str(permission.granted_by_id) if permission.granted_by_id else None,
-        "role": permission.role,
-        "can_view": permission.can_view,
-        "can_edit": permission.can_edit,
-        "can_delete": permission.can_delete,
-        "can_share": permission.can_share,
-        "granted_at": permission.granted_at,
-        "username": username or "Unknown"
-    }
 
 @router.post("/{event_id}/share", response_model=List[Permission])
 def share_event(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     event_id: str = Path(...),
     share_data: ShareEventRequest,
     current_user: User = Depends(deps.get_current_user)
@@ -79,7 +63,7 @@ def share_event(
 @router.get("/{event_id}/permissions", response_model=List[Permission])
 def get_event_permissions(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     event_id: str = Path(...),
     current_user: User = Depends(deps.get_current_user)
 ) -> Any:
@@ -111,7 +95,7 @@ def get_event_permissions(
 @router.put("/{event_id}/permissions/{user_id}", response_model=Permission)
 def update_user_permission(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     event_id: str = Path(...),
     user_id: str = Path(...),
     permission_in: PermissionUpdate,
@@ -156,7 +140,7 @@ def update_user_permission(
 @router.delete("/{event_id}/permissions/{user_id}", status_code=204)
 def remove_user_access(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     event_id: str = Path(...),
     user_id: str = Path(...),
     current_user: User = Depends(deps.get_current_user)

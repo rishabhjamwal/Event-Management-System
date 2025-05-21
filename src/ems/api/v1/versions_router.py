@@ -5,21 +5,19 @@ from sqlalchemy.orm import Session
 
 from ems.dependencies import deps
 from ems.models.user_model import User
-from ems.models.event_model import Event
 from ems.schemas.event_schema import Event as EventSchema
-from ems.schemas.version_schema import EventVersion as EventVersionSchema
-from ems.schemas.version_schema import Changelog as ChangelogSchema
-from ems.schemas.version_schema import DiffResponse
-from ems.services import event_service
-from ems.services import version_service
-from ems.services import permission_service
+from ems.schemas.version_schema import EventVersion as EventVersionSchema, Changelog as ChangelogSchema, DiffResponse
+from ems.services import event_service, version_service, permission_service
+from ems.db import session
+
+
 
 router = APIRouter()
 
 @router.get("/{event_id}/history/{version_id}", response_model=EventVersionSchema)
 def get_event_version(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     event_id: str = Path(...),
     version_id: int = Path(...),
     current_user: User = Depends(deps.get_current_user)
@@ -48,7 +46,7 @@ def get_event_version(
 @router.post("/{event_id}/rollback/{version_id}", response_model=EventSchema)
 def rollback_event(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     event_id: str = Path(...),
     version_id: int = Path(...),
     current_user: User = Depends(deps.get_current_user)
@@ -82,7 +80,7 @@ def rollback_event(
 @router.get("/{event_id}/changelog", response_model=List[ChangelogSchema])
 def get_event_changelog(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     event_id: str = Path(...),
     current_user: User = Depends(deps.get_current_user)
 ) -> Any:
@@ -131,7 +129,7 @@ def get_event_changelog(
 @router.get("/{event_id}/diff/{version_id1}/{version_id2}", response_model=DiffResponse)
 def get_event_diff(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     event_id: str = Path(...),
     version_id1: int = Path(...),
     version_id2: int = Path(...),

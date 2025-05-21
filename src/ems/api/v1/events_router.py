@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Body, status
 from sqlalchemy.orm import Session
 
 from ems.dependencies import deps
+from ems.db import session
 from ems.models.user_model import User
 from ems.schemas.event_schema import Event, EventCreate, EventUpdate
 from ems.services import event_service 
@@ -22,7 +23,7 @@ class ConflictResponse(BaseModel):
 @router.post("/", response_model=Event, status_code=status.HTTP_201_CREATED)
 def create_event(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     event_in: EventCreate,
     current_user: User = Depends(deps.get_current_user)
 ) -> Any:
@@ -52,7 +53,7 @@ def create_event(
 
 @router.get("/", response_model=List[Event])
 def read_events(
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     skip: int = 0,
     limit: int = 100,
     start_date: Optional[datetime] = None,
@@ -70,44 +71,23 @@ def read_events(
 
 @router.get("/{event_id}", response_model=Event)
 def read_event(
-    *,
-    db: Session = Depends(deps.get_db),
-    event_id: uuid.UUID,
-    current_user: User = Depends(deps.get_current_user)
+    event: Event = Depends(deps.get_event_with_permission("view"))
 ) -> Any:
     """
     Get event by ID.
     """
-    event = event_service.get_by_id(db, event_id)
-    if not event:
-        raise HTTPException(status_code=404, detail="Event not found")
-    if event.owner_id != current_user.id:
-        from ems.services import permission_service
-        permission = permission_service.get_permission(db, str(event_id), str(current_user.id))
-        if not permission or not permission.can_view:
-            raise HTTPException(status_code=403, detail="Not enough permissions")
     return event
 
 @router.put("/{event_id}", response_model=Event)
 def update_event(
     *,
-    db: Session = Depends(deps.get_db),
-    event_id: uuid.UUID,
+    event: Event = Depends(deps.get_event_with_permission("edit")),
     event_in: EventUpdate,
-    current_user: User = Depends(deps.get_current_user)
+    db: Session = Depends(session.get_db)
 ) -> Any:
     """
     Update an event.
     """
-    event = event_service.get_by_id(db, event_id)
-    if not event:
-        raise HTTPException(status_code=404, detail="Event not found")
-    if event.owner_id != current_user.id:
-        from ems.services import permission_service
-        permission = permission_service.get_permission(db, str(event_id), str(current_user.id))
-        if not permission or not permission.can_edit:
-            raise HTTPException(status_code=403, detail="Not enough permissions")
-    
     # Check for conflicts if date/time is being updated
     if event_in.start_time or event_in.end_time:
         start_time = event_in.start_time or event.start_time
@@ -117,13 +97,12 @@ def update_event(
             db, 
             start_time, 
             end_time, 
-            current_user.id,
-            event_id
+            str(event.owner_id),
+            str(event.id)
         )
         if conflicts:
-            # Return HTTPException with conflict details
             raise HTTPException(
-                status_code=409,  # Conflict status code
+                status_code=409,
                 detail={
                     "message": "Event update conflicts with existing events",
                     "conflict_ids": [str(conflict.id) for conflict in conflicts]
@@ -136,29 +115,20 @@ def update_event(
 @router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_event(
     *,
-    db: Session = Depends(deps.get_db),
-    event_id: uuid.UUID,
-    current_user: User = Depends(deps.get_current_user)
+    event: Event = Depends(deps.get_event_with_permission("delete")),
+    db: Session = Depends(session.get_db)
 ) -> None:
     """
     Delete an event.
     """
-    event = event_service.get_by_id(db, event_id)
-    if not event:
-        raise HTTPException(status_code=404, detail="Event not found")
-    if event.owner_id != current_user.id:
-        from ems.services import permission_service
-        permission = permission_service.get_permission(db, str(event_id), str(current_user.id))
-        if not permission or not permission.can_delete:
-            raise HTTPException(status_code=403, detail="Not enough permissions")
-    
     event_service.delete(db, db_obj=event)
-    return 
+    
+
 
 @router.post("/batch", response_model=List[Event])
 def create_batch_events(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     events_in: List[EventCreate],
     current_user: User = Depends(deps.get_current_user)
 ) -> Any:

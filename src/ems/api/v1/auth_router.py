@@ -9,13 +9,14 @@ from ems.dependencies import deps
 from ems.schemas.user_schema import User, UserCreate
 from ems.schemas.token_schema import Token
 from ems.services import user_service , auth_service
+from ems.db import session
 
 router = APIRouter()
 
 @router.post("/register", response_model=User)
 def register(
     *,
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     user_in: UserCreate
 ) -> Any:
     """
@@ -41,7 +42,7 @@ def register(
 
 @router.post("/login", response_model=Token)
 def login(
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
     """
@@ -58,7 +59,7 @@ def login(
 
 @router.post("/refresh", response_model=Token)
 def refresh_token(
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     refresh_token: str = Body(..., embed=True)
 ) -> Any:
     """
@@ -74,9 +75,8 @@ def refresh_token(
 
 @router.post("/logout", status_code=status.HTTP_200_OK)
 def logout(
-    db: Session = Depends(deps.get_db),
+    db: Session = Depends(session.get_db),
     token: str = Depends(deps.oauth2_scheme),
-    current_user: User = Depends(deps.get_current_user)
 ) -> Any:
     """
     Logout current user.

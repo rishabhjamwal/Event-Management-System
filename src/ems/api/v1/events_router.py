@@ -5,7 +5,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Body, status
 from sqlalchemy.orm import Session
 
-from ems.api import deps
+from ems.dependencies import deps
 from ems.models.user_model import User
 from ems.schemas.event_schema import Event, EventCreate, EventUpdate
 from ems.services import event_service 
@@ -29,7 +29,6 @@ def create_event(
     """
     Create a new event.
     """
-    print(f"Creating event: {event_in.title} from {event_in.start_time} to {event_in.end_time}")
     
     # Check for conflicting events
     conflicts = event_service.check_for_conflicts(
@@ -40,7 +39,6 @@ def create_event(
     )
     
     if conflicts:
-        print(f"Found conflicts, raising 409 error")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail={
@@ -48,10 +46,9 @@ def create_event(
                 "conflict_ids": [str(conflict.id) for conflict in conflicts]
             }
         )
-    
-    print("No conflicts found, creating event")
-    event = event_service.create(db, obj_in=event_in, owner_id=current_user.id)
-    return event
+    # Create the event
+    return event_service.create(db, obj_in=event_in, owner_id=current_user.id)
+ 
 
 @router.get("/", response_model=List[Event])
 def read_events(

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy.orm import Session
 import uuid
 
-from ems.api import deps
+from ems.dependencies import deps
 from ems.models.user_model import User
 from ems.schemas.permission_schema import Permission, PermissionCreate, PermissionUpdate, ShareEventRequest
 from ems.services import  event_service, permission_service, user_service

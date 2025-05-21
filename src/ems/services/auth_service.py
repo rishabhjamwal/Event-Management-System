@@ -5,7 +5,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from ems.core.config import settings
-from ems.core.security import create_access_token, create_refresh_token, is_token_blacklisted
+from ems.utils.auth import create_access_token, create_refresh_token, is_token_blacklisted
 from ems.models.token_model import TokenBlacklist
 from ems.services import user_service
 

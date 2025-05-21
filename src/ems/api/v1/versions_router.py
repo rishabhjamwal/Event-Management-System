@@ -3,7 +3,7 @@ from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlalchemy.orm import Session
 
-from ems.api import deps
+from ems.dependencies import deps
 from ems.models.user_model import User
 from ems.models.event_model import Event
 from ems.schemas.event_schema import Event as EventSchema

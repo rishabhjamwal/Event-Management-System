@@ -6,7 +6,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from ems.models.user_model import User
-from ems.core.security import get_password_hash, verify_password
+from ems.utils.auth import get_password_hash, verify_password
 from ems.schemas.user_schema import UserCreate, UserUpdate
 
 def get_by_email(db: Session, email: str) -> Optional[User]:

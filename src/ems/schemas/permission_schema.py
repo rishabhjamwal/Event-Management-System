@@ -1,12 +1,12 @@
 # app/schemas/permission.py
 from typing import Optional, List, Union
-from pydantic import BaseModel, validator, field_validator
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 import uuid
 
 class PermissionBase(BaseModel):
     role: str    
-    @validator('role')
+    @field_validator('role')
     @classmethod
     def role_must_be_valid(cls, v):
         valid_roles = ['owner', 'editor', 'viewer']
@@ -19,7 +19,7 @@ class PermissionCreate(PermissionBase):
 
 class PermissionUpdate(BaseModel):
     role: Optional[str] = None    
-    @validator('role')
+    @field_validator('role')
     @classmethod
     def role_must_be_valid(cls, v):
         if v is not None:

@@ -1,6 +1,6 @@
 # app/schemas/user.py
 from typing import Optional
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, field_validator
 from datetime import datetime
 import uuid
 
@@ -11,7 +11,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     
-    @validator('password')
+    @field_validator('password')
     def password_length(cls, v):
         if len(v) < 8:
             raise ValueError('Password must be at least 8 characters long')

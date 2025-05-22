@@ -1,6 +1,6 @@
 # app/schemas/event.py
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 import uuid
 
@@ -13,7 +13,7 @@ class RecurrencePatternBase(BaseModel):
     day_of_month: Optional[int] = None
     month_of_year: Optional[int] = None
     
-    @validator('frequency')
+    @field_validator('frequency')
     def frequency_must_be_valid(cls, v):
         valid_frequencies = ['daily', 'weekly', 'monthly', 'yearly']
         if v not in valid_frequencies:
@@ -30,15 +30,16 @@ class EventBase(BaseModel):
     recurrence_pattern: Optional[Dict[str, Any]] = None
 
 class EventCreate(EventBase):
-    @validator('end_time')
-    def end_time_after_start_time(cls, v, values):
-        if 'start_time' in values and v <= values['start_time']:
+    @field_validator('end_time')
+    @classmethod
+    def end_time_after_start_time(cls, v, info):
+        if 'start_time' in info.data and v <= info.data['start_time']:
             raise ValueError('End time must be after start time')
         return v
     
-    @validator('recurrence_pattern')
-    def validate_recurrence(cls, v, values):
-        if values.get('is_recurring', False) and not v:
+    @field_validator('recurrence_pattern')
+    def validate_recurrence(cls, v, info):
+        if info.data.get('is_recurring', False) and not v:
             raise ValueError('Recurrence pattern required for recurring events')
         return v
 

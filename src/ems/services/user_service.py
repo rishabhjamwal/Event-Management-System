@@ -55,7 +55,7 @@ def authenticate(db: Session, *, username_or_email: str, password: str) -> Optio
     return user
 
 def update_last_login(db: Session, *, user: User) -> User:
-    user.last_login = datetime.now(datetime.timezone.utc)
+    user.last_login = datetime.now()
     db.add(user)
     db.commit()
     db.refresh(user)

@@ -83,4 +83,7 @@ Once the server is running, you can test the API using the interactive documenta
 - 🚀 Rate limiting for security
 - 🔄 Batch operations for events
 
+## API Docs
+[NeoFi Submission](https://docs.google.com/document/d/11X9uidoriLxSABL9Lb6TQHtp3nY7S2DSK0HGxSzr7WM/edit?usp=sharing)
+
 

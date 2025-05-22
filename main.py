@@ -1,4 +1,8 @@
 # app/main.py
+import utils.clients
+import utils.http_session
+import utils.transport
+import utils.session
 from fastapi import FastAPI
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address

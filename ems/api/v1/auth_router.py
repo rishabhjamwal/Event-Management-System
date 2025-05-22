@@ -10,6 +10,9 @@ from ems.schemas.user_schema import User, UserCreate
 from ems.schemas.token_schema import Token
 from ems.services import user_service , auth_service
 from ems.db import session
+from slowapi import Limiter
+from ems.utils.rate_limit import limiter
+from ems.core.config import settings
 
 router = APIRouter()
 

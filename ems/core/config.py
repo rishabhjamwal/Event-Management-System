@@ -1,12 +1,19 @@
 # app/core/config.py
 import secrets
+import os
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl, field_validator
+from pydantic import AnyHttpUrl, field_validator, ConfigDict
 from typing import ClassVar
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(
+        case_sensitive=True,
+        env_file=".env",
+        extra='allow'  # This allows extra environment variables like PORT
+    )
+    
     API_V1_STR: str = "/api"
     SECRET_KEY: str = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 7 days = 7 days
@@ -19,22 +26,17 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
 
     # Database settings
-    POSTGRES_SERVER: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
-    DATABASE_URI: str  # Changed from PostgresDsn to str
+    POSTGRES_SERVER: str = os.getenv("PGHOST", "localhost")
+    POSTGRES_USER: str = os.getenv("PGUSER", "postgres")
+    POSTGRES_PASSWORD: str = os.getenv("PGPASSWORD", "password") 
+    POSTGRES_DB: str = os.getenv("PGDATABASE", "ems")
+    DATABASE_URI: str = os.getenv("DATABASE_URI", "postgresql://postgres:password@localhost:5432/ems")  # Changed from PostgresDsn to str
 
     # Authentication settings
     JWT_ALGORITHM: str = "HS256"
     
     # Rate limiting
     RATE_LIMIT_PER_MINUTE: int = 60
-    
-    model_config: ClassVar[dict] = {
-        "case_sensitive": True,
-        "env_file": ".env"
-    }
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:

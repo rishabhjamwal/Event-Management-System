@@ -69,6 +69,10 @@ createdb EMS
 - **Local Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)
 - **Local ReDoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
+## Testing
+
+Once the server is running, you can test the API using the interactive documentation at `http://localhost:8000/docs`
+
 ## Features
 
 - 🔐 JWT Authentication with refresh tokens
@@ -79,6 +83,4 @@ createdb EMS
 - 🚀 Rate limiting for security
 - 🔄 Batch operations for events
 
-## Testing
 
-Once the server is running, you can test the API using the interactive documentation at `http://localhost:8000/docs`

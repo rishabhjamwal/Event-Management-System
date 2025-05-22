@@ -5,13 +5,12 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic_settings import BaseSettings
 from pydantic import AnyHttpUrl, field_validator, ConfigDict
-from typing import ClassVar
 
 class Settings(BaseSettings):
     model_config = ConfigDict(
         case_sensitive=True,
         env_file=".env",
-        extra='allow'  # This allows extra environment variables like PORT
+        extra='allow'
     )
     
     API_V1_STR: str = "/api"
